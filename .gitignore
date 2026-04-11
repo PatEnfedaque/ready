@@ -1,0 +1,16 @@
+# Build outputs
+bin/
+gen/
+mir/
+internal-mir/
+external-mir/
+ready.prg
+ready.prg.debug.xml
+ready.iq
+
+# Generated test data (zone-specific — regenerate with scripts/generate_sim.py)
+simulation.fit
+
+# Local developer settings
+.vscode/settings.json
+.claude/settings.local.json

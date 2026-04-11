@@ -1,0 +1,9 @@
+# Normalize line endings to LF in the repository; check out as-is on all platforms
+* text=auto eol=lf
+
+# Binaries — no line-ending conversion
+*.png binary
+*.svg binary
+*.fit binary
+*.iq  binary
+*.prg binary

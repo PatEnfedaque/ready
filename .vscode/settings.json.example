@@ -1,0 +1,5 @@
+{
+    "monkeyC.sdkPath": "C:/path/to/connectiq-sdk",
+    "monkeyC.developerKeyPath": "C:/path/to/developer_key",
+    "monkeyC.typeCheckLevel": "Strict"
+}

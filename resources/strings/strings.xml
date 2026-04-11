@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<strings>
+    <string id="AppName">Ready</string>
+    <string id="LatLabel">Target Latitude</string>
+    <string id="LonLabel">Target Longitude</string>
+    <string id="RadiusLabel">Zone Radius (m)</string>
+</strings>

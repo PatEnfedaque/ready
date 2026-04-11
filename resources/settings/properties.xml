@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<properties>
+    <property id="TriggerRadius"    type="float">200.0</property>
+    <property id="HrStart"          type="number">120</property>
+    <property id="HrStop"           type="number">100</property>
+    <property id="HrDebugReduction" type="number">0</property>
+    <property id="ZoneCount"        type="number">0</property>
+<property id="Zone0Lat"         type="string">0.0</property>
+    <property id="Zone0Lon"         type="string">0.0</property>
+    <property id="Zone0Sport"       type="number">0</property>
+    <property id="Zone0AutoStop"      type="boolean">true</property>
+    <property id="Zone0StopTimeout"   type="number">30</property>
+    <property id="Zone1Lat"           type="string">0.0</property>
+    <property id="Zone1Lon"           type="string">0.0</property>
+    <property id="Zone1Sport"         type="number">0</property>
+    <property id="Zone1AutoStop"      type="boolean">true</property>
+    <property id="Zone1StopTimeout"   type="number">30</property>
+    <property id="Zone2Lat"           type="string">0.0</property>
+    <property id="Zone2Lon"           type="string">0.0</property>
+    <property id="Zone2Sport"         type="number">0</property>
+    <property id="Zone2AutoStop"      type="boolean">true</property>
+    <property id="Zone2StopTimeout"   type="number">30</property>
+    <property id="Zone3Lat"           type="string">0.0</property>
+    <property id="Zone3Lon"           type="string">0.0</property>
+    <property id="Zone3Sport"         type="number">0</property>
+    <property id="Zone3AutoStop"      type="boolean">true</property>
+    <property id="Zone3StopTimeout"   type="number">30</property>
+    <property id="Zone4Lat"           type="string">0.0</property>
+    <property id="Zone4Lon"           type="string">0.0</property>
+    <property id="Zone4Sport"         type="number">0</property>
+    <property id="Zone4AutoStop"      type="boolean">true</property>
+    <property id="Zone4StopTimeout"   type="number">30</property>
+</properties>
