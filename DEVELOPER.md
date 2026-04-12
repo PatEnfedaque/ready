@@ -141,11 +141,27 @@ CIQ enforces strict symbol visibility at compile time. This app is foreground-on
 
 ## Simulator Testing
 
-**Launch:**
-```
-%SDK%\bin\simulator.exe                          # must be running first
-%SDK%\bin\monkeydo.bat ready.prg vivoactive5
-```
+**Full workflow (run these in order):**
+
+1. Build the sideload binary:
+   ```
+   build.bat
+   ```
+
+2. Launch the simulator (leave it running):
+   ```
+   %SDK%\bin\simulator.exe
+   ```
+
+3. From the project root, load the app into the running simulator:
+   ```
+   %SDK%\bin\monkeydo.bat ready.prg vivoactive5
+   ```
+   The app will appear in the simulator window. `monkeydo` connects to the already-running simulator — if the simulator is not open first, this will fail.
+
+4. Add a zone (first time only):
+   - Simulation menu → GPS → set a lat/lon
+   - In the app, swipe up or press MENU → **Add Zone Here**
 
 `SDK` is defined at the top of `build.bat`.
 

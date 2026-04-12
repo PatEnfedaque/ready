@@ -1,4 +1,5 @@
 import Toybox.Lang;
+import Toybox.Timer;
 import Toybox.WatchUi;
 
 (:foreground)
@@ -98,10 +99,63 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
         return true;
     }
 
-    // BACK — exit app (no confirmation — session is saved on cleanup)
+    // BACK — confirm before exit
     function onBack() as Boolean {
-        mView.cleanup();
-        WatchUi.popView(WatchUi.SLIDE_RIGHT);
+        WatchUi.pushView(
+            new WatchUi.Confirmation("Exit Ready?"),
+            new ExitConfirmDelegate(mView),
+            WatchUi.SLIDE_IMMEDIATE
+        );
+        return true;
+    }
+}
+
+// Shared 10-second auto-dismiss timer for confirmation dialogs.
+// Start in initialize(); cancel in onResponse() before handling the result.
+(:foreground)
+class ConfirmTimeout {
+    private var mTimer as Timer.Timer;
+    private var mDone  as Boolean = false;
+
+    function initialize() {
+        mTimer = new Timer.Timer();
+    }
+
+    (:typecheck(false))
+    function start(callback as Lang.Method) as Void {
+        mTimer.start(callback, 10000, false);
+    }
+
+    function cancel() as Void {
+        if (!mDone) { mTimer.stop(); mDone = true; }
+    }
+
+    function onTimeout() as Void {
+        if (!mDone) { mDone = true; WatchUi.popView(WatchUi.SLIDE_IMMEDIATE); }
+    }
+}
+
+(:foreground)
+class ExitConfirmDelegate extends WatchUi.ConfirmationDelegate {
+
+    private var mView    as MainView;
+    private var mTimeout as ConfirmTimeout;
+
+    function initialize(view as MainView) {
+        ConfirmationDelegate.initialize();
+        mView    = view;
+        mTimeout = new ConfirmTimeout();
+        mTimeout.start(method(:onTimeout));
+    }
+
+    function onTimeout() as Void { mTimeout.onTimeout(); }
+
+    function onResponse(response as WatchUi.Confirm) as Boolean {
+        mTimeout.cancel();
+        if (response == WatchUi.CONFIRM_YES) {
+            mView.cleanup();
+            WatchUi.popView(WatchUi.SLIDE_RIGHT);
+        }
         return true;
     }
 }
@@ -109,14 +163,20 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
 (:foreground)
 class ResumeConfirmDelegate extends WatchUi.ConfirmationDelegate {
 
-    private var mView as MainView;
+    private var mView    as MainView;
+    private var mTimeout as ConfirmTimeout;
 
     function initialize(view as MainView) {
         ConfirmationDelegate.initialize();
-        mView = view;
+        mView    = view;
+        mTimeout = new ConfirmTimeout();
+        mTimeout.start(method(:onTimeout));
     }
 
+    function onTimeout() as Void { mTimeout.onTimeout(); }
+
     function onResponse(response as WatchUi.Confirm) as Boolean {
+        mTimeout.cancel();
         if (response == WatchUi.CONFIRM_YES) {
             mView.clearManualStop();
             WatchUi.requestUpdate();
@@ -128,14 +188,20 @@ class ResumeConfirmDelegate extends WatchUi.ConfirmationDelegate {
 (:foreground)
 class StopConfirmDelegate extends WatchUi.ConfirmationDelegate {
 
-    private var mView as MainView;
+    private var mView    as MainView;
+    private var mTimeout as ConfirmTimeout;
 
     function initialize(view as MainView) {
         ConfirmationDelegate.initialize();
-        mView = view;
+        mView    = view;
+        mTimeout = new ConfirmTimeout();
+        mTimeout.start(method(:onTimeout));
     }
 
+    function onTimeout() as Void { mTimeout.onTimeout(); }
+
     function onResponse(response as WatchUi.Confirm) as Boolean {
+        mTimeout.cancel();
         if (response == WatchUi.CONFIRM_YES) {
             mView.manualStop();
         }
