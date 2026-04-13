@@ -1,5 +1,10 @@
 # Release Notes
 
+## 1.0.4 — 2026-04-12
+
+- Fix: pressing BACK on a confirmation could cause the app to exit unexpectedly (regression in 1.0.3).
+- Confirmation dialogs auto-dismiss after 5 seconds (was 10).
+
 ## 1.0.3 — 2026-04-12
 
 ### Changes

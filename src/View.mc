@@ -109,6 +109,10 @@ class MainView extends WatchUi.View {
     private var mMenuArrowVisible as Boolean = false;
     private var mMenuArrowSeconds as Number  = 0;
 
+    // Confirmation dialog auto-dismiss — dedicated timer so it fires while MainView is hidden
+    private var mConfirmActive as Boolean      = false;
+    private var mConfirmTimer  as Timer.Timer? = null;
+
     function initialize() {
         View.initialize();
     }
@@ -117,6 +121,8 @@ class MainView extends WatchUi.View {
     }
 
     function onShow() as Void {
+        // Confirmation was dismissed externally — cancel the timer and clear the flag
+        setConfirmActive(false);
         loadSettings();
         Sensor.setEnabledSensors([ Sensor.SENSOR_HEARTRATE ]);
         Sensor.enableSensorEvents(method(:onSensor));
@@ -281,6 +287,25 @@ class MainView extends WatchUi.View {
         }
         checkAutoLogic();
     }
+
+    // ── Confirmation dialog tracking ──────────────────────────────────────
+    function setConfirmActive(active as Boolean) as Void {
+        mConfirmActive = active;
+        if (active) {
+            mConfirmTimer = new Timer.Timer();
+            mConfirmTimer.start(method(:onConfirmTimeout), 5000, false);
+        } else {
+            if (mConfirmTimer != null) { mConfirmTimer.stop(); mConfirmTimer = null; }
+        }
+    }
+
+    function onConfirmTimeout() as Void {
+        mConfirmActive = false;
+        mConfirmTimer  = null;
+        WatchUi.popView(WatchUi.SLIDE_IMMEDIATE);
+    }
+
+    function isConfirmActive() as Boolean { return mConfirmActive; }
 
     // ── Timer ─────────────────────────────────────────────────────────────
     function onTimer() as Void {
@@ -478,6 +503,7 @@ class MainView extends WatchUi.View {
     // ── Full teardown on exit ─────────────────────────────────────────────
     function cleanup() as Void {
         if (mTimer != null) { mTimer.stop(); mTimer = null; }
+        if (mConfirmTimer != null) { mConfirmTimer.stop(); mConfirmTimer = null; }
         Sensor.enableSensorEvents(null);
         Position.enableLocationEvents(Position.LOCATION_DISABLE, null);
         if (mIsRecording && mSession != null) {
