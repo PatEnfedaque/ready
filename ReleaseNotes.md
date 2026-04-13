@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.0.5 — 2026-04-13
+
+- Re-release of 1.0.4 to replace a bad binary upload.
+
 ## 1.0.4 — 2026-04-12
 
 - Fix: pressing BACK on a confirmation could cause the app to exit unexpectedly (regression in 1.0.3).
