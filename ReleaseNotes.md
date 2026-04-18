@@ -1,5 +1,13 @@
 # Release Notes
 
+## 1.0.6 — 2026-04-18
+
+- On touch devices, swipe up now opens the settings menu directly from any state.
+- While recording, tapping the screen shows the stop confirmation. Swipe up opens a reduced menu showing only HR Stop and the active zone's Auto Stop toggle.
+- Zone delete now requires confirmation.
+- Animated swipe-up arrow shown on touch devices when no zones are configured, to guide first-time setup. Arrow only appears once GPS is acquired.
+- Removed Debug HR menu entry.
+
 ## 1.0.5 — 2026-04-13
 
 - Re-release of 1.0.4 to replace a bad binary upload.

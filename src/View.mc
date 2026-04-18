@@ -104,10 +104,10 @@ class MainView extends WatchUi.View {
     private var mTriggerRadius as Double = DEFAULT_RADIUS;
 
     // UI
-    private var mTimer           as Timer.Timer? = null;
-    private var mStatus          as String  = "Waiting for GPS...";
-    private var mMenuArrowVisible as Boolean = false;
-    private var mMenuArrowSeconds as Number  = 0;
+    private var mTimer          as Timer.Timer? = null;
+    private var mStatus         as String  = "Waiting for GPS...";
+    private var mArrowAnimating as Boolean = false;
+    private var mArrowPhase     as Number  = 0;
 
     // Confirmation dialog auto-dismiss — dedicated timer so it fires while MainView is hidden
     private var mConfirmActive as Boolean      = false;
@@ -204,6 +204,7 @@ class MainView extends WatchUi.View {
     function getZoneCount()        as Number           { return mZones.size(); }
     function isGpsReady()          as Boolean          { return mGpsReady; }
     function isRecording()         as Boolean          { return mIsRecording; }
+    function getActiveZoneIdx()    as Number           { return mActiveZoneIdx; }
 
     // ── Setters ───────────────────────────────────────────────────────────
     function setHrStart(val as Number) as Void {
@@ -226,7 +227,7 @@ class MainView extends WatchUi.View {
     // ── Zone management ───────────────────────────────────────────────────
     function addCurrentLocationAsZone() as Void {
         if (!mGpsReady || mZones.size() >= MAX_ZONES) { return; }
-        mZones.add({:lat => mLat, :lon => mLon, :sport => 0, :autoStop => true, :stopTimeout => 30});
+        mZones.add({:lat => mLat, :lon => mLon, :sport => 23, :autoStop => true, :stopTimeout => 30});
         saveZones();
         mStatus = "Zone " + mZones.size() + " added!";
     }
@@ -314,9 +315,14 @@ class MainView extends WatchUi.View {
             teardownSession();
         }
 
-        if (mMenuArrowVisible) {
-            mMenuArrowSeconds--;
-            if (mMenuArrowSeconds <= 0) { mMenuArrowVisible = false; }
+        var isTouchScreen = false;
+        try { isTouchScreen = System.getDeviceSettings().isTouchScreen; } catch (ex instanceof Lang.Exception) {}
+        if (mZones.size() == 0 && isTouchScreen && !mIsRecording && mGpsReady) {
+            mArrowAnimating = true;
+            mArrowPhase = (mArrowPhase + 1) % 4;
+        } else {
+            mArrowAnimating = false;
+            mArrowPhase = 0;
         }
 
         var effHrStop    = mHrStop - mHrDebugReduction;
@@ -487,18 +493,7 @@ class MainView extends WatchUi.View {
     function isManualStop()   as Boolean { return mManualStop; }
     function clearManualStop() as Void   { mManualStop = false; }
 
-    function showMenuArrow() as Void {
-        mMenuArrowVisible = true;
-        mMenuArrowSeconds = 2;
-        WatchUi.requestUpdate();
-    }
-
-    function isMenuArrowVisible() as Boolean { return mMenuArrowVisible; }
-
-    function hideMenuArrow() as Void {
-        mMenuArrowVisible = false;
-        WatchUi.requestUpdate();
-    }
+    function isArrowAnimating() as Boolean { return mArrowAnimating; }
 
     // ── Full teardown on exit ─────────────────────────────────────────────
     function cleanup() as Void {
@@ -555,8 +550,9 @@ class MainView extends WatchUi.View {
         dc.drawText(cx, cy + ps * 5, Graphics.FONT_XTINY, statusText,
             Graphics.TEXT_JUSTIFY_CENTER);
 
-        if (mMenuArrowVisible) {
-            drawMenuArrow(dc, cx, h - ps * 8, ps);
+        if (mArrowAnimating) {
+            var offsets = [0, -(ps * 2), -(ps * 4), -(ps * 2)] as Array<Number>;
+            drawMenuArrow(dc, cx, h - ps * 8 + (offsets[mArrowPhase] as Number), ps);
         }
     }
 

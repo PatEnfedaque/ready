@@ -54,15 +54,6 @@ class SettingsDelegate extends WatchUi.Menu2InputDelegate {
                 menu.addItem(new WatchUi.MenuItem(v + "m", (v == mView.getTriggerRadius().toNumber()) ? "current" : null, v, null));
             }
             WatchUi.pushView(menu, new RadiusMenuDelegate(mView), WatchUi.SLIDE_UP);
-        } else if (id == :hrDebug) {
-            var menu = new WatchUi.Menu2({:title => "Debug HR Offset"});
-            var opts = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100] as Array<Number>;
-            for (var i = 0; i < opts.size(); i++) {
-                var v     = opts[i] as Number;
-                var label = (v == 0) ? "Off" : "-" + v;
-                menu.addItem(new WatchUi.MenuItem(label, (v == mView.getHrDebugReduction()) ? "current" : null, v, null));
-            }
-            WatchUi.pushView(menu, new HrDebugMenuDelegate(mView), WatchUi.SLIDE_UP);
         } else if (id == :version) {
             WatchUi.popView(WatchUi.SLIDE_DOWN);
         }
@@ -112,9 +103,11 @@ class ZoneMenuDelegate extends WatchUi.Menu2InputDelegate {
             }
             WatchUi.pushView(menu, new ZoneTimeoutMenuDelegate(mView, mIdx), WatchUi.SLIDE_UP);
         } else if (id == :delete) {
-            mView.deleteZone(mIdx);
-            WatchUi.popView(WatchUi.SLIDE_DOWN);
-            WatchUi.popView(WatchUi.SLIDE_DOWN);
+            WatchUi.pushView(
+                new WatchUi.Confirmation("Delete Zone " + (mIdx + 1) + "?"),
+                new ZoneDeleteConfirmDelegate(mView, mIdx),
+                WatchUi.SLIDE_IMMEDIATE
+            );
         }
     }
 
@@ -208,15 +201,27 @@ class ZoneTimeoutMenuDelegate extends WatchUi.Menu2InputDelegate {
     function onBack() as Void { WatchUi.popView(WatchUi.SLIDE_DOWN); }
 }
 
-// ── Debug HR Offset sub-menu ──────────────────────────────────────────────────
+// ── Zone delete confirmation ───────────────────────────────────────────────────
 (:foreground)
-class HrDebugMenuDelegate extends WatchUi.Menu2InputDelegate {
+class ZoneDeleteConfirmDelegate extends WatchUi.ConfirmationDelegate {
     private var mView as MainView;
-    function initialize(view as MainView) { Menu2InputDelegate.initialize(); mView = view; }
-    function onSelect(item as WatchUi.MenuItem) as Void {
-        mView.setHrDebugReduction(item.getId() as Number);
-        WatchUi.popView(WatchUi.SLIDE_DOWN);
-        WatchUi.popView(WatchUi.SLIDE_DOWN);
+    private var mIdx  as Number;
+
+    function initialize(view as MainView, idx as Number) {
+        ConfirmationDelegate.initialize();
+        mView = view;
+        mIdx  = idx;
     }
-    function onBack() as Void { WatchUi.popView(WatchUi.SLIDE_DOWN); }
+
+    function onResponse(response as WatchUi.Confirm) as Boolean {
+        if (response == WatchUi.CONFIRM_YES) {
+            mView.deleteZone(mIdx);
+            WatchUi.popView(WatchUi.SLIDE_DOWN); // confirmation
+            WatchUi.popView(WatchUi.SLIDE_DOWN); // zone menu
+            WatchUi.popView(WatchUi.SLIDE_DOWN); // main menu
+        } else {
+            WatchUi.popView(WatchUi.SLIDE_DOWN); // confirmation only
+        }
+        return true;
+    }
 }

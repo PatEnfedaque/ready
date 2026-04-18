@@ -16,10 +16,15 @@ Copy `.vscode/settings.json.example` to `.vscode/settings.json` and fill in your
 
 **Build:**
 ```
-build.bat
+build.bat [prg|iq|all]
 ```
 
-Produces two outputs at the project root:
+| Argument | Output | Use case |
+|---|---|---|
+| `all` (default) | `ready.iq` + `ready.prg` | Full release build |
+| `prg` | `ready.prg` only | Simulator testing (faster) |
+| `iq` | `ready.iq` only | Release package only |
+
 - `ready.iq` — signed release package for all supported devices
 - `ready.prg` — vivoactive5 sideload binary for simulator testing
 
@@ -36,7 +41,7 @@ Flags: `-e` (entry point), `-r` (release), `-w` (warnings as errors), `-l 3` (op
 | `src/Shared.mc` | Constants (`MAX_ZONES`, `DEFAULT_RADIUS`, `APP_VERSION`) and `haversineMetres()` |
 | `manifest.xml` | App metadata, supported device list, permissions |
 | `monkey.jungle` | Build manifest pointer (source discovery is handled by SDK defaults) |
-| `build.bat` | Build script — runs `monkeybrains.jar` twice (`.iq` then `.prg`) |
+| `build.bat` | Build script — accepts `prg`, `iq`, or `all` (default); runs `monkeybrains.jar` accordingly |
 | `scripts/generate_sim.py` | Generates `simulation.fit` for simulator FIT playback testing |
 | `scripts/gen_icon.py` | Generates `resources/drawables/launcher_icon.svg` (56×56 pixel art) |
 | `scripts/gen_icon_hires.py` | Generates `launcher_icon_hires.svg` at 10× scale (560×560) for JPEG export |
@@ -145,7 +150,7 @@ CIQ enforces strict symbol visibility at compile time. This app is foreground-on
 
 1. Build the sideload binary:
    ```
-   build.bat
+   build.bat prg
    ```
 
 2. Launch the simulator (leave it running):

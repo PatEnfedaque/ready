@@ -17,6 +17,18 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
     }
 
     private function openMenu() as Boolean {
+        if (mView.isRecording()) {
+            var activeIdx = mView.getActiveZoneIdx();
+            var menu = new WatchUi.Menu2({:title => "Recording"});
+            menu.addItem(new WatchUi.MenuItem("HR Stop", mView.getHrStop() + " bpm", :hrStop, null));
+            if (activeIdx >= 0) {
+                var autoStop = (mView.getZones()[activeIdx] as Dictionary)[:autoStop] as Boolean;
+                menu.addItem(new WatchUi.MenuItem("Auto Stop", autoStop ? "On" : "Off", :autoStop, null));
+            }
+            WatchUi.pushView(menu, new RecordingMenuDelegate(mView), WatchUi.SLIDE_UP);
+            return true;
+        }
+
         var menu = new WatchUi.Menu2({:title => "Ready"});
 
         // Add zone option when GPS is ready and slots remain
@@ -37,18 +49,15 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
         menu.addItem(new WatchUi.MenuItem("HR Start",    mView.getHrStart() + " bpm",                      :hrStart, null));
         menu.addItem(new WatchUi.MenuItem("HR Stop",     mView.getHrStop()  + " bpm",                      :hrStop,  null));
         menu.addItem(new WatchUi.MenuItem("Zone Radius", mView.getTriggerRadius().toNumber() + "m",         :radius,  null));
-        var dbg = mView.getHrDebugReduction();
-        menu.addItem(new WatchUi.MenuItem("Debug HR",    (dbg == 0) ? "Off" : "-" + dbg,                   :hrDebug, null));
         menu.addItem(new WatchUi.MenuItem("Version",      APP_VERSION,                                       :version, null));
 
         WatchUi.pushView(menu, new SettingsDelegate(mView), WatchUi.SLIDE_UP);
         return true;
     }
 
-    // Swipe up while arrow is visible → open menu (touch devices)
+    // Swipe up → open menu (touch devices)
     function onSwipe(swipeEvent as WatchUi.SwipeEvent) as Boolean {
-        if (swipeEvent.getDirection() == WatchUi.SWIPE_UP && mView.isMenuArrowVisible()) {
-            mView.hideMenuArrow();
+        if (swipeEvent.getDirection() == WatchUi.SWIPE_UP) {
             return openMenu();
         }
         return false;
@@ -57,10 +66,7 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
     // SELECT / screen tap
     function onSelect() as Boolean {
         if (System.getDeviceSettings().isTouchScreen) {
-            // Touch: tap shows up-arrow hint; swipe up within 2s opens menu.
-            // Stop/resume confirmations take priority while active.
             if (mView.isManualStop()) {
-                mView.hideMenuArrow();
                 mView.setConfirmActive(true);
                 WatchUi.pushView(
                     new WatchUi.Confirmation("Resume monitoring?"),
@@ -70,7 +76,6 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
                 return true;
             }
             if (mView.isRecording()) {
-                mView.hideMenuArrow();
                 mView.setConfirmActive(true);
                 WatchUi.pushView(
                     new WatchUi.Confirmation("Stop activity?"),
@@ -79,7 +84,6 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
                 );
                 return true;
             }
-            mView.showMenuArrow();
             return true;
         }
 
@@ -113,6 +117,39 @@ class InputDelegate extends WatchUi.BehaviorDelegate {
         );
         return true;
     }
+}
+
+(:foreground)
+class RecordingMenuDelegate extends WatchUi.Menu2InputDelegate {
+
+    private var mView as MainView;
+
+    function initialize(view as MainView) {
+        Menu2InputDelegate.initialize();
+        mView = view;
+    }
+
+    function onSelect(item as WatchUi.MenuItem) as Void {
+        var id = item.getId();
+        if (id == :hrStop) {
+            var menu = new WatchUi.Menu2({:title => "HR Stop"});
+            var opts = [50, 60, 70, 80, 90, 100, 110, 120] as Array<Number>;
+            for (var i = 0; i < opts.size(); i++) {
+                var v = opts[i] as Number;
+                menu.addItem(new WatchUi.MenuItem(v + " bpm", (v == mView.getHrStop()) ? "current" : null, v, null));
+            }
+            WatchUi.pushView(menu, new HrStopMenuDelegate(mView), WatchUi.SLIDE_UP);
+        } else if (id == :autoStop) {
+            var activeIdx = mView.getActiveZoneIdx();
+            if (activeIdx >= 0) {
+                var cur = (mView.getZones()[activeIdx] as Dictionary)[:autoStop] as Boolean;
+                mView.setZoneAutoStop(activeIdx, !cur);
+            }
+            WatchUi.popView(WatchUi.SLIDE_DOWN);
+        }
+    }
+
+    function onBack() as Void { WatchUi.popView(WatchUi.SLIDE_DOWN); }
 }
 
 (:foreground)

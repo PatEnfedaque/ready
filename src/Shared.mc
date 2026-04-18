@@ -5,7 +5,7 @@ const MAX_ZONES      = 5;
 const DEFAULT_RADIUS = 200.0d;
 
 (:foreground)
-const APP_VERSION = "1.0.5";
+const APP_VERSION = "1.0.6";
 
 // Haversine great-circle distance in metres
 function haversineMetres(
